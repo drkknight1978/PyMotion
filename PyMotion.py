@@ -11,10 +11,11 @@ from datetime import datetime
 
 '''Differentiates the two images and the ensure that the image
 has no negative numbers'''
-def motionLevel(image1, image2):
+def motionLevel(image1, image2, T = 0):
     arr1 = np.array (image1)
     arr2 = np.array (image2)
     arr3 = np.absolute (np.subtract(arr1, arr2, dtype = 'int8'))
+    arr3 = (arr3 > T) * arr3
     return arr3, arr3.sum()
 
 '''Displays the difference array on a screen,  more for debugging 
@@ -38,7 +39,7 @@ camera = PiCamera()
 #Number of seconds between camera shots
 nSec = 1
 #pixel value difference between images
-threshold = 3000
+threshold = 1000
 pixelTot = 0 #total differemonce in pixels between images
 
 #check image resolution and long term photo resolution.
@@ -69,13 +70,13 @@ try:
         camera.capture(stream, format='bmp',use_video_port=False , resize =(xSmall, ySmall))
         stream.seek (0)
         snapShot = Image.open(stream).convert('L')
-        diffArr, moveAmt = motionLevel(snapShot, oldSnapshot)
+        diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 9)
         imDiff = Image.fromarray (diffArr)
         _ = display(diffArr, moveAmt)
         if moveAmt > threshold:
             camera.capture(str(datetime.now()).replace(' ','+') + '.jpg')
         cnt += 1
-        sleep (0.25)
+        #sleep (0.25)
 except KeyboardInterrupt:
     print ('')
     print('exited, camera closed.')
