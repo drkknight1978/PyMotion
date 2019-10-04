@@ -20,15 +20,15 @@ def motionLevel(image1, image2, T = 0):
 
 '''Displays the difference array on a screen,  more for debugging 
 and testing'''
-def display (inArray, total):
+def display (inArray, total, pic = '0'):
     yDim, xDim = inArray.shape
     displayArray = inArray.tolist()
     _ = system('clear')
-    for j in range(xDim - 1):
-        for i in range(yDim - 1):
+    for i in range(yDim - 1):
+        for j in range(xDim - 1):
             print (displayArray[i][j], ' , ', end ='')
         print ('')
-    print('---------- ', total, ' --------')
+    print('---------- ', total, ' -------- snaps taken - ', pic)
 
 
 
@@ -39,7 +39,7 @@ camera = PiCamera()
 #Number of seconds between camera shots
 nSec = 1
 #pixel value difference between images
-threshold = 1000
+threshold = 0
 pixelTot = 0 #total differemonce in pixels between images
 
 #check image resolution and long term photo resolution.
@@ -59,8 +59,8 @@ sleep(2)
 camera.capture(stream, format='bmp',use_video_port=False  ,resize =(xSmall, ySmall))
 oldSnapshot = Image.open(stream).convert('L')
 
-
-cnt=0
+pic = 0
+cnt = 0
 
 try:
     while True:
@@ -70,13 +70,14 @@ try:
         camera.capture(stream, format='bmp',use_video_port=False , resize =(xSmall, ySmall))
         stream.seek (0)
         snapShot = Image.open(stream).convert('L')
-        diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 9)
+        diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 25)
         imDiff = Image.fromarray (diffArr)
-        _ = display(diffArr, moveAmt)
+        _ = display(diffArr, moveAmt, str(pic))
         if moveAmt > threshold:
             camera.capture(str(datetime.now()).replace(' ','+') + '.jpg')
+            pic += 1
         cnt += 1
-        #sleep (0.25)
+        sleep (0.1)
 except KeyboardInterrupt:
     print ('')
     print('exited, camera closed.')
