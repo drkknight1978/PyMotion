@@ -1,15 +1,34 @@
+'''PyMotion v0.1 - Written by C.Mclaren UK.
+   date 4th October 2019'''
+
 from io import BytesIO
 from time import sleep
 from picamera import PiCamera
 from PIL import Image
 import numpy as np
 from os import system
+from datetime import datetime
 
+'''Differentiates the two images and the ensure that the image
+has no negative numbers'''
 def motionLevel(image1, image2):
     arr1 = np.array (image1)
     arr2 = np.array (image2)
     arr3 = np.absolute (np.subtract(arr1, arr2, dtype = 'int8'))
     return arr3, arr3.sum()
+
+'''Displays the difference array on a screen,  more for debugging 
+and testing'''
+def display (inArray, total):
+    yDim, xDim = inArray.shape
+    displayArray = inArray.tolist()
+    _ = system('clear')
+    for j in range(xDim - 1):
+        for i in range(yDim - 1):
+            print (displayArray[i][j], ' , ', end ='')
+        print ('')
+    print('---------- ', total, ' --------')
+
 
 
 #set-up camera and stream
@@ -52,19 +71,9 @@ try:
         snapShot = Image.open(stream).convert('L')
         diffArr, moveAmt = motionLevel(snapShot, oldSnapshot)
         imDiff = Image.fromarray (diffArr)
-        displayArray = diffArr.tolist()
-        _ = system('clear')
-        for j in range(xSmall - 1):
-            for i in range(ySmall - 1):
-                print (displayArray[i][j], ' , ', end ='')
-            print ('')
-        print('---------- ', moveAmt, ' --------')
+        _ = display(diffArr, moveAmt)
         if moveAmt > threshold:
-            camera.capture(str(cnt) + '.jpg')
-        #print(imDiff)
-        #imDiff.save(str(cnt) + '.bmp')
-        #print( 'Changes - ' + str(moveAmt) + ', Snap! - ' + str(cnt) )
-        #sleep(nSec) #sleep for a time.
+            camera.capture(str(datetime.now()).replace(' ','+') + '.jpg')
         cnt += 1
         sleep (0.25)
 except KeyboardInterrupt:
