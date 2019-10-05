@@ -20,25 +20,28 @@ def motionLevel(image1, image2, T = 0):
 
 '''Displays the difference array on a screen,  more for debugging 
 and testing'''
-def display (inArray, total, pic = '0'):
+def display (inArray, total, pic = 0, count = 9999999):
     yDim, xDim = inArray.shape
     displayArray = inArray.tolist()
-    _ = system('clear')
+    dStr = ''
     for i in range(yDim - 1):
         for j in range(xDim - 1):
-            print (displayArray[i][j], ' , ', end ='')
-        print ('')
-    print('---------- ', total, ' -------- snaps taken - ', pic)
+            dStr = dStr + str(displayArray[i][j]).zfill(3)
+        dStr = dStr + '\n'
+    dStr = dStr + '---------- ' + str(total) + ' -------- snaps taken - ' + str (pic) + ' cycles = ' +str(count)
+    return (dStr)
 
 '''displays the image using text symbols'''
 def displayImgTxt (inArray):
     yDim, xDim = inArray.shape
     displayArray = inArray.tolist()
     _ = system('clear')
+    dStr = ''
     for i in range(yDim - 1):
         for j in range(xDim - 1):
-            print (numConv(displayArray[i][j]), end ='')
-        print ('')
+            dStr = dStr + numConv(displayArray[i][j])
+        dStr = dStr + '\n'
+    return dStr
 
 
 '''converts a number that is less than 255 to a text symbol - used
@@ -46,7 +49,8 @@ for displaying the camera image'''
 def numConv(num):
     if num > 255:
         num = 255
-    symbols =['.', ',', '-', '_', '~', '|', '/', '+' ,'*', '#','@']
+    #symbols =['.', ',', ';', ':', '~', '!', '|', '/', '=','}', '+' ,'*', '#','@']
+    symbols = ['.', ',', '-', '"', '^', ';', ':', '_', '/', '+', '=', '*', '#', '@']
     nSymbol = len (symbols)
     step = 256 / nSymbol
     index = int(num / step)
@@ -93,15 +97,17 @@ try:
 
         diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 25)
         imDiff = Image.fromarray (diffArr)
-
-        #_ = display(diffArr, moveAmt, str(pic))
-        _ = displayImgTxt(snapArr)
+        print (datetime.now())
+        #disp = display(diffArr, moveAmt, pic, cnt)
+        #disp = disp + '\n'+ 'Actual View ' + '\n' +  displayImgTxt(snapArr)
+        #_ = system ('clear')
+        #print (disp)
         if moveAmt > threshold:
             camera.capture(str(datetime.now()).replace(' ','+') + '.jpg')
             pic += 1
         cnt += 1
         oldSnapshot = snapShot
-        sleep (0.1)
+        #sleep(0.1)
 except KeyboardInterrupt:
     print ('')
     print('exited, camera closed.')
