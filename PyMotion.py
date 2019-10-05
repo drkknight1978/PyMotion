@@ -30,6 +30,27 @@ def display (inArray, total, pic = '0'):
         print ('')
     print('---------- ', total, ' -------- snaps taken - ', pic)
 
+'''displays the image using text symbols'''
+def displayImgTxt (inArray):
+    yDim, xDim = inArray.shape
+    displayArray = inArray.tolist()
+    _ = system('clear')
+    for i in range(yDim - 1):
+        for j in range(xDim - 1):
+            print (numConv(displayArray[i][j]), end ='')
+        print ('')
+
+
+'''converts a number that is less than 255 to a text symbol - used
+for displaying the camera image'''
+def numConv(num):
+    if num > 255:
+        num = 255
+    symbols =['.', ',', '-', '_', '~', '|', '/', '+' ,'*', '#','@']
+    nSymbol = len (symbols)
+    step = 256 / nSymbol
+    index = int(num / step)
+    return symbols[index]
 
 
 #set-up camera and stream
@@ -39,7 +60,7 @@ camera = PiCamera()
 #Number of seconds between camera shots
 nSec = 1
 #pixel value difference between images
-threshold = 0
+threshold = 10
 pixelTot = 0 #total differemonce in pixels between images
 
 #check image resolution and long term photo resolution.
@@ -48,8 +69,6 @@ ySmall = 24
 
 xBig = 2592
 yBig = 1944
-
-
 
 #warm up camera
 camera.resolution = (xBig, yBig)
@@ -70,13 +89,18 @@ try:
         camera.capture(stream, format='bmp',use_video_port=False , resize =(xSmall, ySmall))
         stream.seek (0)
         snapShot = Image.open(stream).convert('L')
+        snapArr = np.array(snapShot)
+
         diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 25)
         imDiff = Image.fromarray (diffArr)
-        _ = display(diffArr, moveAmt, str(pic))
+
+        #_ = display(diffArr, moveAmt, str(pic))
+        _ = displayImgTxt(snapArr)
         if moveAmt > threshold:
             camera.capture(str(datetime.now()).replace(' ','+') + '.jpg')
             pic += 1
         cnt += 1
+        oldSnapshot = snapShot
         sleep (0.1)
 except KeyboardInterrupt:
     print ('')
