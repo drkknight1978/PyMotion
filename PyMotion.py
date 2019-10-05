@@ -97,13 +97,13 @@ try:
 
         diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 25)
         imDiff = Image.fromarray (diffArr)
-        print (datetime.now())
+        print ('Front ' + str(datetime.now()) + ' >>>>> ' +str(pic))
         #disp = display(diffArr, moveAmt, pic, cnt)
         #disp = disp + '\n'+ 'Actual View ' + '\n' +  displayImgTxt(snapArr)
         #_ = system ('clear')
         #print (disp)
         if moveAmt > threshold:
-            camera.capture(str(datetime.now()).replace(' ','+') + '.jpg')
+            camera.capture('img' + str(pic).zfill(4) +'>' + str(datetime.now()).replace(' ','+') + '.jpg')
             pic += 1
         cnt += 1
         oldSnapshot = snapShot
