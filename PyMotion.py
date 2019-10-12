@@ -2,7 +2,7 @@
    date 4th October 2019'''
 
 from io import BytesIO
-from time import sleep
+from time import sleep, time
 from picamera import PiCamera
 from PIL import Image
 import numpy as np
@@ -50,7 +50,7 @@ def numConv(num):
     if num > 255:
         num = 255
     #symbols =['.', ',', ';', ':', '~', '!', '|', '/', '=','}', '+' ,'*', '#','@']
-    symbols = ['.', ',', '-', '"', '^', ';', ':', '_', '/', '+', '=', '*', '#', '@']
+    symbols = [' ','.', ',', '-', '"', '^', ';', ':', '_', '/', '+', '=', '*', '#', '@']
     nSymbol = len (symbols)
     step = 256 / nSymbol
     index = int(num / step)
@@ -68,8 +68,8 @@ threshold = 10
 pixelTot = 0 #total differemonce in pixels between images
 
 #check image resolution and long term photo resolution.
-xSmall = 32
-ySmall = 24
+xSmall = 48
+ySmall = 32
 
 xBig = 2592
 yBig = 1944
@@ -82,8 +82,11 @@ sleep(2)
 camera.capture(stream, format='bmp',use_video_port=False  ,resize =(xSmall, ySmall))
 oldSnapshot = Image.open(stream).convert('L')
 
+
+
 pic = 0
 cnt = 0
+tStart = time()
 
 try:
     while True:
@@ -98,12 +101,16 @@ try:
         diffArr, moveAmt = motionLevel(snapShot, oldSnapshot, 25)
         imDiff = Image.fromarray (diffArr)
         print ('Front ' + str(datetime.now()) + ' >>>>> ' +str(pic))
-        #disp = display(diffArr, moveAmt, pic, cnt)
-        #disp = disp + '\n'+ 'Actual View ' + '\n' +  displayImgTxt(snapArr)
-        #_ = system ('clear')
-        #print (disp)
+        disp = display(diffArr, moveAmt, pic, cnt)
+        disp = disp + '\n'+ 'Actual View ' + '\n' +  displayImgTxt(snapArr)
+        _ = system ('clear')
+        print (disp)
         if moveAmt > threshold:
-            camera.capture('img' + str(pic).zfill(4) +'>' + str(datetime.now()).replace(' ','+') + '.jpg')
+            f = open('moves.csv','a+')
+            camera.capture('img' + str(pic).zfill(7) +'>' + str(datetime.now()).replace(' ','+') + '.jpg')
+            csv = str(datetime.now()) + ',' + str(time()-tStart) + ',' + '1\n'
+            f.write(csv)
+            f.close()
             pic += 1
         cnt += 1
         oldSnapshot = snapShot
