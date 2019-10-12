@@ -61,11 +61,9 @@ def numConv(num):
 stream = BytesIO()
 camera = PiCamera()
 
-#Number of seconds between camera shots
-nSec = 1
-#pixel value difference between images
-threshold = 10
-pixelTot = 0 #total differemonce in pixels between images
+
+threshold = 10 #Threshold of the number of pixels to be moving before taking a shot.
+pixelTot = 0 #total difference in pixel brightness between images
 
 #check image resolution and long term photo resolution.
 xSmall = 48
@@ -90,8 +88,9 @@ tStart = time()
 
 try:
     while True:
-        '''Will take a shot every n seconds.  Shot to be taken at a low resolution and compared
-        if there is movement take another higher resolution shot'''
+        '''Will keep taking a shot and compare with last shot, if there's movement above a threshold
+        the camera will take a picture and record the time it happend.  Shot to be taken at a low 
+        resolution and compared if there is movement take another higher resolution shot'''
         stream.seek (0) #ensure  that we start at the begining of the stream.
         camera.capture(stream, format='bmp',use_video_port=False , resize =(xSmall, ySmall))
         stream.seek (0)
